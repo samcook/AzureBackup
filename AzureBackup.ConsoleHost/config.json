@@ -1,0 +1,56 @@
+﻿{
+  "mode": "", // snapsot, backuplocal, backupblob, servercopy
+
+  "snapshot": {
+    // use either connectionstring or storageaccountname and sastoken
+    "connectionstring": "",
+    "storageaccountname": "",
+    "sastoken": "",
+    "sharename": "",
+    "retainsnapshots": ""
+  },
+
+  "backuplocal": {
+    // use either connectionstring or storageaccountname and sastoken
+    "sourceconnectionstring": "",
+    "sourcestorageaccountname": "",
+    "sourcesastoken": "",
+    "sourcesharename": "",
+
+    "targetpath": "",
+    "targetfilenameprefix": "backup",
+
+    "archivetype": "zip" // zip, tar, targzip, tarbzip2
+  },
+
+  "backupblob": {
+    // use either connectionstring or storageaccountname and sastoken
+    "sourceconnectionstring": "",
+    "sourcestorageaccountname": "",
+    "sourcesastoken": "",
+    "sourcesharename": "",
+
+    // use either connectionstring or storageaccountname and sastoken
+    "targetconnectionstring": "",
+    "targetstorageaccountname": "",
+    "targetsastoken": "",
+    "targetblobcontainername": "",
+    "targetblobnameprefix": "backup",
+
+    "archivetype": "zip" // zip, tar, targzip, tarbzip2
+  },
+
+  "servercopy": {
+    // use either connectionstring or storageaccountname and sastoken
+    "sourceconnectionstring": "",
+    "sourcestorageaccountname": "",
+    "sourcesastoken": "",
+    "sourcesharename": "",
+
+    // use either connectionstring or storageaccountname and sastoken
+    "targetconnectionstring": "",
+    "targetstorageaccountname": "",
+    "targetsastoken": "",
+    "targetsharename": ""
+  }
+}
