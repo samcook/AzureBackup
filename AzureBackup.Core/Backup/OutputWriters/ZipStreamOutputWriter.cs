@@ -27,7 +27,10 @@ namespace AzureBackup.Core.Backup.OutputWriters
 
 				Log.Debug(() => $"Adding {zipEntryName} ({fileInfo.Length} bytes) to archive");
 
-				var zipEntry = new ZipEntry(zipEntryName);
+				var zipEntry = new ZipEntry(zipEntryName)
+				{
+					DateTime = fileInfo.LastModified ?? DateTime.UtcNow
+				};
 
 				this.zipOutputStream.PutNextEntry(zipEntry);
 

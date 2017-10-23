@@ -48,7 +48,7 @@ namespace AzureBackup.Core.Backup.OutputWriters
 				{
 					Name = fileName,
 					Size = fileInfo.Length,
-					ModTime = fileInfo.LastModified ?? new DateTime(1970, 1, 1)
+					ModTime = fileInfo.LastModified ?? DateTime.UtcNow
 				};
 
 				Log.Debug(() => $"Adding {fileName} ({fileInfo.Length} bytes) to archive");
