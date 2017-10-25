@@ -159,6 +159,7 @@
     <Compile Include="Backup\BackupProviders\AzureServerSideCopyBackupProvider.cs" />
     <Compile Include="Backup\BackupProviders\LocalProcessBackupProvider.cs" />
     <Compile Include="Backup\OutputWriters\AzureStreamHelpers.cs" />
+    <Compile Include="Backup\OutputWriters\NonFlushingStream.cs" />
     <Compile Include="Backup\OutputWriters\TarStreamOutputWriter.cs" />
     <Compile Include="Backup\OutputWriters\ZipStreamOutputWriter.cs" />
     <Compile Include="Backup\SourceDirectoryInfo.cs" />
