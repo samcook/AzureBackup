@@ -67,7 +67,7 @@ namespace AzureBackup.Core.Backup.OutputWriters
 
 			using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
 			{
-				if (inputStream != null)
+				if (inputStream != null && inputStream.Length > 0)
 				{
 					await inputStream.CopyToAsync(tarOutputStream, 81920, cancellationToken);
 				}

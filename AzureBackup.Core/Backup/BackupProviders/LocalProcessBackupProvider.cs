@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AzureBackup.Core.Logging;
@@ -22,6 +23,19 @@ namespace AzureBackup.Core.Backup.BackupProviders
 		{
 			Log.Info(() => "Starting backup");
 
+			//await SequentialFetchAsync(cancellationToken);
+			await ParallelFetchAsync(cancellationToken);
+
+			Log.Info(() => "Finished backup");
+
+			//if (outputWriter is IDisposable disposable)
+			//{
+			//	disposable.Dispose();
+			//}
+		}
+
+		private async Task SequentialFetchAsync(CancellationToken cancellationToken)
+		{
 			var inputFiles = this.sourceFileInfoProvider.GetInputFiles();
 
 			foreach (var fileInfo in inputFiles)
@@ -30,13 +44,57 @@ namespace AzureBackup.Core.Backup.BackupProviders
 			}
 
 			this.outputWriter.CloseArchive();
+		}
 
-			Log.Info(() => "Finished backup");
+		private async Task ParallelFetchAsync(CancellationToken cancellationToken)
+		{
+			var inputFiles = this.sourceFileInfoProvider.GetInputFiles();
 
-			//if (outputWriter is IDisposable disposable)
-			//{
-			//	disposable.Dispose();
-			//}
+			var inputFileStreams = inputFiles
+				.AsParallel()
+				.AsOrdered()
+				//.WithDegreeOfParallelism(4)
+				.WithMergeOptions(ParallelMergeOptions.NotBuffered)
+				.Select(async x => await ReadInputToMemoryStreamAsync(x, cancellationToken))
+				.Select(x => x.Result);
+
+			foreach (var item in inputFileStreams)
+			{
+				await this.outputWriter.AddFileToArchiveAsync(item, cancellationToken);
+
+				(await item.GetStreamAsync(cancellationToken))?.Dispose();
+			}
+
+			this.outputWriter.CloseArchive();
+		}
+
+		private static async Task<SourceFileInfo> ReadInputToMemoryStreamAsync(SourceFileInfo fileInfo, CancellationToken cancellationToken)
+		{
+			var localFileInfo = fileInfo;
+			Log.Debug(() => $"Reading input for {fileInfo.Name}");
+
+			using (var sourceStream = await fileInfo.GetStreamAsync(cancellationToken))
+			{
+				if (sourceStream != null)
+				{
+					var tempStream = new MemoryStream();
+					
+					await sourceStream.CopyToAsync(tempStream, 81920, cancellationToken);
+
+					tempStream.Seek(0, SeekOrigin.Begin);
+
+					localFileInfo = new SourceFileInfo(
+						fileInfo.Name,
+						fileInfo.Length,
+						fileInfo.ParentDirectories,
+						token => Task.FromResult<Stream>(tempStream),
+						fileInfo.LastModified);
+				}
+			}
+
+			Log.Debug(() => $"Finished reading input for {fileInfo.Name}");
+
+			return localFileInfo;
 		}
 	}
 }
