@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,30 +18,35 @@ namespace AzureBackup.Core.Backup.OutputWriters
 			this.zipOutputStream = new ZipOutputStream(outputStream);
 		}
 
-		public async Task WriteOutputAsync(IEnumerable<SourceFileInfo> fileInfos, CancellationToken cancellationToken)
+		public async Task AddFileToArchiveAsync(SourceFileInfo fileInfo, CancellationToken cancellationToken)
 		{
-			foreach (var fileInfo in fileInfos)
+			var zipEntryName = fileInfo.GetNameWithPath("/");
+
+			Log.Debug(() => $"Adding {zipEntryName} ({fileInfo.Length} bytes) to archive");
+
+			var zipEntry = new ZipEntry(zipEntryName)
 			{
-				var zipEntryName = fileInfo.GetNameWithPath("/");
+				DateTime = fileInfo.LastModified ?? DateTime.UtcNow
+			};
 
-				Log.Debug(() => $"Adding {zipEntryName} ({fileInfo.Length} bytes) to archive");
+			this.zipOutputStream.PutNextEntry(zipEntry);
 
-				var zipEntry = new ZipEntry(zipEntryName)
+			using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
+			{
+				if (inputStream != null)
 				{
-					DateTime = fileInfo.LastModified ?? DateTime.UtcNow
-				};
-
-				this.zipOutputStream.PutNextEntry(zipEntry);
-
-				using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
-				{
-					if (inputStream != null)
-					{
-						await inputStream.CopyToAsync(zipOutputStream, 81920, cancellationToken);
-					}
+					await inputStream.CopyToAsync(zipOutputStream, 81920, cancellationToken);
 				}
+			}
 
-				this.zipOutputStream.CloseEntry();
+			this.zipOutputStream.CloseEntry();
+		}
+
+		public void CloseArchive()
+		{
+			if (this.zipOutputStream.IsFinished)
+			{
+				return;
 			}
 
 			this.zipOutputStream.Finish();
@@ -52,6 +56,8 @@ namespace AzureBackup.Core.Backup.OutputWriters
 
 		public void Dispose()
 		{
+			this.CloseArchive();
+
 			this.zipOutputStream.Dispose();
 		}
 	}

@@ -24,7 +24,12 @@ namespace AzureBackup.Core.Backup.BackupProviders
 
 			var inputFiles = this.sourceFileInfoProvider.GetInputFiles();
 
-			await this.outputWriter.WriteOutputAsync(inputFiles, cancellationToken);
+			foreach (var fileInfo in inputFiles)
+			{
+				await this.outputWriter.AddFileToArchiveAsync(fileInfo, cancellationToken);
+			}
+
+			this.outputWriter.CloseArchive();
 
 			Log.Info(() => "Finished backup");
 

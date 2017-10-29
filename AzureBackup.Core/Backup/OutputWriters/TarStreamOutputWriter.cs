@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +13,7 @@ namespace AzureBackup.Core.Backup.OutputWriters
 	{
 		private static readonly ILog Log = LogProvider.GetCurrentClassLogger();
 
+
 		public enum Compression
 		{
 			None,
@@ -22,59 +22,77 @@ namespace AzureBackup.Core.Backup.OutputWriters
 		}
 
 		private readonly TarOutputStream tarOutputStream;
+		private bool isClosed;
 
 		public TarStreamOutputWriter(Stream outputStream, Compression compression = Compression.None)
 		{
 			switch (compression)
 			{
+				case Compression.None:
+					break;
 				case Compression.Gzip:
 					outputStream = new GZipOutputStream(outputStream);
 					break;
 				case Compression.Bzip2:
 					outputStream = new BZip2OutputStream(outputStream);
 					break;
+				default:
+					throw new ArgumentException($"Unknown Compression type: {compression}");
 			}
 
 			this.tarOutputStream = new TarOutputStream(outputStream);
 		}
 
-		public async Task WriteOutputAsync(IEnumerable<SourceFileInfo> fileInfos, CancellationToken cancellationToken = default(CancellationToken))
+		public async Task AddFileToArchiveAsync(SourceFileInfo fileInfo, CancellationToken cancellationToken)
 		{
-			foreach (var fileInfo in fileInfos)
+			if (isClosed)
 			{
-				var fileName = fileInfo.GetNameWithPath("/");
-
-				var tarHeader = new TarHeader
-				{
-					Name = fileName,
-					Size = fileInfo.Length,
-					ModTime = fileInfo.LastModified ?? DateTime.UtcNow
-				};
-
-				Log.Debug(() => $"Adding {fileName} ({fileInfo.Length} bytes) to archive");
-
-				var tarEntry = new TarEntry(tarHeader);
-
-				this.tarOutputStream.PutNextEntry(tarEntry);
-
-				using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
-				{
-					if (inputStream != null)
-					{
-						await inputStream.CopyToAsync(tarOutputStream, 81920, cancellationToken);
-					}
-				}
-
-				this.tarOutputStream.CloseEntry();
+				throw new InvalidOperationException("Archive has been closed");
 			}
 
-			this.tarOutputStream.Finish();
+			var fileName = fileInfo.GetNameWithPath("/");
 
+			var tarHeader = new TarHeader
+			{
+				Name = fileName,
+				Size = fileInfo.Length,
+				ModTime = fileInfo.LastModified ?? DateTime.UtcNow
+			};
+
+			Log.Debug(() => $"Adding {fileName} ({fileInfo.Length} bytes) to archive");
+
+			var tarEntry = new TarEntry(tarHeader);
+
+			this.tarOutputStream.PutNextEntry(tarEntry);
+
+			using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
+			{
+				if (inputStream != null)
+				{
+					await inputStream.CopyToAsync(tarOutputStream, 81920, cancellationToken);
+				}
+			}
+
+			this.tarOutputStream.CloseEntry();
+		}
+
+		public void CloseArchive()
+		{
+			if (isClosed)
+			{
+				return;
+			}
+
+			this.isClosed = true;
+
+			this.tarOutputStream.Finish();
 			this.tarOutputStream.Close();
 		}
 
 		public void Dispose()
 		{
+			this.CloseArchive();
+
 			this.tarOutputStream.Dispose();
 		}
 	}
