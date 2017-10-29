@@ -34,7 +34,13 @@ namespace AzureBackup.Core.Backup.OutputWriters
 
 				this.zipOutputStream.PutNextEntry(zipEntry);
 
-				await fileInfo.CopyToStreamAsync(this.zipOutputStream, cancellationToken);
+				using (var inputStream = await fileInfo.GetStreamAsync(cancellationToken))
+				{
+					if (inputStream != null)
+					{
+						await inputStream.CopyToAsync(zipOutputStream, 81920, cancellationToken);
+					}
+				}
 
 				this.zipOutputStream.CloseEntry();
 			}

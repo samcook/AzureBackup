@@ -53,7 +53,7 @@ namespace AzureBackup.Core.Backup.FileInfoProviders
 								file.Name,
 								file.Properties.Length,
 								parentDirectories,
-								async (stream, cancellationToken) => await file.DownloadToStreamAsync(stream, cancellationToken),
+								async cancellationToken => await file.OpenReadAsync(cancellationToken),
 								file.Properties.LastModified?.DateTime);
 
 							break;

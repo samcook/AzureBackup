@@ -17,30 +17,30 @@ namespace AzureBackup.Core.Backup
 		public DateTime? LastModified { get; }
 		public IReadOnlyList<string> ParentDirectories { get; }
 
-		private readonly Func<Stream, CancellationToken, Task> copyToStreamAsync;
+		private readonly Func<CancellationToken, Task<Stream>> getStreamAsync;
 
 		public SourceFileInfo(
 			string name,
 			long length,
 			IReadOnlyList<string> parentDirectories,
-			Func<Stream, CancellationToken, Task> copyToStreamAsync,
+			Func<CancellationToken, Task<Stream>> getStreamAsync,
 			DateTime? lastModified = null)
 		{
 			this.Name = name;
 			this.Length = length;
 			this.LastModified = lastModified;
 			this.ParentDirectories = parentDirectories ?? new List<string>();
-			this.copyToStreamAsync = copyToStreamAsync;
+			this.getStreamAsync = getStreamAsync;
 		}
 
-		public async Task CopyToStreamAsync(Stream target, CancellationToken cancellationToken = default(CancellationToken))
+		public async Task<Stream> GetStreamAsync(CancellationToken cancellationToken = default(CancellationToken))
 		{
-			//Log.Trace(() => $"Copying {Path.Combine(Path.Combine(this.ParentDirectories.ToArray()), this.Name)} to stream");
-
-			if (this.copyToStreamAsync != null)
+			if (this.getStreamAsync != null)
 			{
-				await this.copyToStreamAsync(target, cancellationToken);
+				return await this.getStreamAsync(cancellationToken);
 			}
+
+			return null;
 		}
 
 		public string GetNameWithPath(string separator)
