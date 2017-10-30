@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncEnumerable, Version=2.1.0.0, Culture=neutral, PublicKeyToken=0426b068161bd1d1, processorArchitecture=MSIL">
+      <HintPath>..\packages\AsyncEnumerator.2.1.0\lib\net45\AsyncEnumerable.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpZipLib.1.0.0-alpha2\lib\netstandard1.3\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -158,6 +161,7 @@
     <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
     <Compile Include="Backup\BackupProviders\AzureServerSideCopyBackupProvider.cs" />
     <Compile Include="Backup\BackupProviders\LocalProcessBackupProvider.cs" />
+    <Compile Include="Backup\BackupProviders\PreBufferingLocalProcessBackupProvider.cs" />
     <Compile Include="Backup\OutputWriters\AzureStreamHelpers.cs" />
     <Compile Include="Backup\OutputWriters\NonFlushingStream.cs" />
     <Compile Include="Backup\OutputWriters\TarStreamOutputWriter.cs" />

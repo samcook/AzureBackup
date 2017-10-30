@@ -145,7 +145,7 @@ namespace AzureBackup.ConsoleHost
 
 				Log.Info(() => $"Backup to local zip: {zipName}");
 
-				var backupProvider = new LocalProcessBackupProvider(
+				var backupProvider = new PreBufferingLocalProcessBackupProvider(
 					new AzureFileShareFileInfoProvider(sourceCloudFileClient, snapshotShare.Name, snapshotShare.SnapshotTime),
 					GetOutputWriter(options.ArchiveType, new FileStream(zipName, FileMode.CreateNew)));
 
@@ -181,7 +181,7 @@ namespace AzureBackup.ConsoleHost
 
 				Log.Info(() => $"Backup to blob zip: {blobContainer.Uri}/{blobName}");
 
-				var backupProvider = new LocalProcessBackupProvider(
+				var backupProvider = new PreBufferingLocalProcessBackupProvider(
 					new AzureFileShareFileInfoProvider(sourceCloudFileClient, snapshotShare.Name, snapshotShare.SnapshotTime),
 					GetOutputWriter(options.ArchiveType, await AzureStreamHelpers.GetBlobOutputStreamAsync(blobContainer, blobName, false, cancellationToken)));
 
