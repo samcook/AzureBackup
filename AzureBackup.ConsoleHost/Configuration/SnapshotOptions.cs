@@ -8,5 +8,6 @@ namespace AzureBackup.ConsoleHost.Configuration
 		public string SASToken { get; set; }
 		public string ShareName { get; set; }
 		public int? RetainSnapshots { get; set; }
+		public string MetadataKey { get; set; }
 	}
 }

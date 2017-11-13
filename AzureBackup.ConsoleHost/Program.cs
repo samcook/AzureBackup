@@ -118,7 +118,7 @@ namespace AzureBackup.ConsoleHost
 
 			var cloudFileClient = cloudStorageAccount.CreateCloudFileClient();
 
-			var azureShareSnapshotManager = new AzureShareSnapshotManager(cloudFileClient, "AzureShareBackupSnapshotTime");
+			var azureShareSnapshotManager = new AzureShareSnapshotManager(cloudFileClient, $"AzureShareBackup-{options.MetadataKey}");
 
 			await azureShareSnapshotManager.CreateManagedSnapshotAsync(options.ShareName, cancellationToken);
 
@@ -135,7 +135,7 @@ namespace AzureBackup.ConsoleHost
 			var sourceCloudStorageAccount = GetCloudStorageAccount(options.SourceConnectionString, options.SourceSASToken, options.SourceStorageAccountName);
 			var sourceCloudFileClient = sourceCloudStorageAccount.CreateCloudFileClient();
 
-			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, "AzureShareBackupZipSnapshot");
+			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, $"AzureShareBackupZipSnapshot-{Guid.NewGuid():N}");
 
 			var snapshotShare = await azureShareSnapshotManager.CreateManagedSnapshotAsync(options.SourceShareName, cancellationToken);
 
@@ -167,7 +167,7 @@ namespace AzureBackup.ConsoleHost
 			var sourceCloudStorageAccount = GetCloudStorageAccount(options.SourceConnectionString, options.SourceSASToken, options.SourceStorageAccountName);
 			var sourceCloudFileClient = sourceCloudStorageAccount.CreateCloudFileClient();
 
-			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, "AzureShareBackupZipSnapshot");
+			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, $"AzureShareBackupZipSnapshot-{Guid.NewGuid():N}");
 
 			var snapshotShare = await azureShareSnapshotManager.CreateManagedSnapshotAsync(options.SourceShareName, cancellationToken);
 
@@ -203,7 +203,7 @@ namespace AzureBackup.ConsoleHost
 			var sourceCloudStorageAccount = GetCloudStorageAccount(options.SourceConnectionString, options.SourceSASToken, options.SourceStorageAccountName);
 			var sourceCloudFileClient = sourceCloudStorageAccount.CreateCloudFileClient();
 
-			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, "AzureShareBackupServerCopySnapshot");
+			var azureShareSnapshotManager = new AzureShareSnapshotManager(sourceCloudFileClient, $"AzureShareBackupServerCopySnapshot-{Guid.NewGuid():N}");
 
 			var snapshotShare = await azureShareSnapshotManager.CreateManagedSnapshotAsync(options.SourceShareName, cancellationToken);
 
