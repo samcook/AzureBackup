@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AzureBackup.Core.Logging;
@@ -16,11 +17,13 @@ namespace AzureBackup.Core.Snapshot
 
 		private readonly CloudFileClient cloudFileClient;
 
+		private static readonly Regex AllowedMetadataKeyRegex = new Regex("^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled);
+
 		public AzureShareSnapshotManager(CloudFileClient cloudFileClient, string managedSnapshotMetadataKey)
 		{
-			if (string.IsNullOrWhiteSpace(managedSnapshotMetadataKey))
+			if (managedSnapshotMetadataKey == null || !AllowedMetadataKeyRegex.IsMatch(managedSnapshotMetadataKey))
 			{
-				throw new ArgumentException("Managed Snapshot Metadata key must not be null or empty");
+				throw new ArgumentException("Managed Snapshot Metadata Key must contain only letters, numbers and underscores, and must not begin with a number");
 			}
 
 			this.cloudFileClient = cloudFileClient;
